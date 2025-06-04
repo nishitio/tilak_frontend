@@ -55,7 +55,7 @@ const LeadCaptureModal = ({ open, onOpenChange, source = "general", productInter
 
     try {
       // Check for existing email and save lead using API
-      const response = await fetch('http://localhost:5050/api/leads', {
+      const response = await fetch(process.env.BACKEND_API_URL || 'http://localhost:5050' + '/api/leads', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

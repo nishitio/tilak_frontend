@@ -41,7 +41,7 @@ const Admin = () => {
   const fetchLeads = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5050/api/leads', {
+      const response = await fetch(process.env.BACKEND_API_URL || 'http://localhost:5050' + '/api/leads', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -127,7 +127,7 @@ const Admin = () => {
           return;
         }
 
-        const response = await fetch('http://localhost:5050/api/leads', {
+          const response = await fetch(process.env.BACKEND_API_URL||'http://localhost:5050'+ '/api/leads', {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`
