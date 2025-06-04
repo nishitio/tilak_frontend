@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -55,33 +54,34 @@ const LeadCaptureModal = ({ open, onOpenChange, source = "general", productInter
     setIsSubmitting(true);
 
     try {
-      // Check for existing email
-      const existingLeads = JSON.parse(localStorage.getItem("leads") || "[]");
-      const emailExists = existingLeads.some((lead: LeadData) => lead.email.toLowerCase() === email.toLowerCase());
-      
-      if (emailExists) {
-        toast({
-          title: "Already Registered",
-          description: "This email is already on our waitlist. We'll notify you when we launch!",
-        });
+      // Check for existing email and save lead using API
+      const response = await fetch('http://localhost:5050/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.toLowerCase().trim(),
+          source,
+          productInterest,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 400 && data.message === 'Email already exists') {
+          toast({
+            title: "Already Registered",
+            description: "This email is already on our waitlist. We'll notify you when we launch!",
+          });
+        } else {
+          throw new Error(data.message || 'Failed to save lead');
+        }
         setIsSubmitting(false);
         return;
       }
-
-      // Create new lead data
-      const leadData: LeadData = {
-        id: Date.now().toString(),
-        name: name.trim(),
-        email: email.toLowerCase().trim(),
-        source,
-        productInterest,
-        timestamp: new Date().toISOString(),
-        date: new Date().toLocaleDateString(),
-      };
-
-      // Save to localStorage
-      const updatedLeads = [...existingLeads, leadData];
-      localStorage.setItem("leads", JSON.stringify(updatedLeads));
 
       setIsSuccess(true);
       toast({
@@ -98,6 +98,7 @@ const LeadCaptureModal = ({ open, onOpenChange, source = "general", productInter
       }, 3000);
 
     } catch (error) {
+      console.error('Error saving lead:', error);
       toast({
         title: "Something went wrong",
         description: "Please try again later.",

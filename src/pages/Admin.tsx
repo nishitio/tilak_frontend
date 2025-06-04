@@ -1,18 +1,18 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Download, Users, Calendar, TrendingUp } from "lucide-react";
 import * as XLSX from 'xlsx';
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface LeadData {
-  id: string;
+  _id: string; // MongoDB ID
   name: string;
   email: string;
   source: string;
   productInterest: string;
-  timestamp: string;
-  date: string;
+  createdAt: string; // Use createdAt from API
 }
 
 const Admin = () => {
@@ -23,40 +23,78 @@ const Admin = () => {
     thisWeek: 0,
     topSource: '',
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const storedLeads = JSON.parse(localStorage.getItem("leads") || "[]");
-    setLeads(storedLeads);
-    
-    // Calculate stats
-    const today = new Date().toDateString();
-    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    
-    const todayLeads = storedLeads.filter((lead: LeadData) => 
-      new Date(lead.timestamp).toDateString() === today
-    );
-    
-    const weekLeads = storedLeads.filter((lead: LeadData) => 
-      new Date(lead.timestamp) >= oneWeekAgo
-    );
-    
-    // Find most popular source
-    const sourceCounts = storedLeads.reduce((acc: any, lead: LeadData) => {
-      acc[lead.source] = (acc[lead.source] || 0) + 1;
-      return acc;
-    }, {});
-    
-    const topSource = Object.keys(sourceCounts).reduce((a, b) => 
-      sourceCounts[a] > sourceCounts[b] ? a : b, ''
-    );
-    
-    setStats({
-      total: storedLeads.length,
-      today: todayLeads.length,
-      thisWeek: weekLeads.length,
-      topSource: topSource || 'No data',
-    });
-  }, []);
+    // Check if user is authenticated
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    fetchLeads();
+  }, [navigate]);
+
+  const fetchLeads = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('http://localhost:5050/api/leads', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.status === 401) {
+        // Token is invalid or expired
+        localStorage.removeItem('adminToken');
+        navigate('/login');
+        return;
+      }
+
+      const data = await response.json();
+      setLeads(data);
+
+      // Calculate stats
+      const today = new Date().toDateString();
+      const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+      const todayLeads = data.filter((lead: LeadData) =>
+        new Date(lead.createdAt).toDateString() === today
+      );
+
+      const weekLeads = data.filter((lead: LeadData) =>
+        new Date(lead.createdAt) >= oneWeekAgo
+      );
+
+      // Find most popular source
+      const sourceCounts = data.reduce((acc: any, lead: LeadData) => {
+        acc[lead.source] = (acc[lead.source] || 0) + 1;
+        return acc;
+      }, {});
+
+      const topSource = Object.keys(sourceCounts).reduce((a, b) =>
+        sourceCounts[a] > sourceCounts[b] ? a : b, ''
+      );
+
+      setStats({
+        total: data.length,
+        today: todayLeads.length,
+        thisWeek: weekLeads.length,
+        topSource: topSource || 'No data',
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch leads",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const exportToExcel = () => {
     if (leads.length === 0) {
@@ -69,8 +107,8 @@ const Admin = () => {
       'Email': lead.email,
       'Source': lead.source,
       'Product Interest': lead.productInterest,
-      'Date': lead.date,
-      'Timestamp': new Date(lead.timestamp).toLocaleString(),
+      'Date': lead.createdAt,
+      'Timestamp': new Date(lead.createdAt).toLocaleString(),
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -80,13 +118,55 @@ const Admin = () => {
     XLSX.writeFile(workbook, `wellness-leads-${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
-  const clearAllLeads = () => {
+  const clearAllLeads = async () => {
     if (window.confirm('Are you sure you want to clear all leads? This action cannot be undone.')) {
-      localStorage.removeItem('leads');
-      setLeads([]);
-      setStats({ total: 0, today: 0, thisWeek: 0, topSource: 'No data' });
+      try {
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
+        const response = await fetch('http://localhost:5050/api/leads', {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.status === 401) {
+          localStorage.removeItem('adminToken');
+          navigate('/login');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('Failed to clear leads');
+        }
+        setLeads([]);
+        setStats({ total: 0, today: 0, thisWeek: 0, topSource: 'No data' });
+        toast({
+          title: "Success",
+          description: "All leads have been cleared",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to clear leads",
+          variant: "destructive",
+        });
+      }
     }
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    navigate('/login');
+  };
+
+  if (isLoading) {
+    return <div className="p-8">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-sage-50 p-6">
@@ -184,7 +264,7 @@ const Admin = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-sage-200">
                   {leads.slice().reverse().map((lead) => (
-                    <tr key={lead.id} className="hover:bg-sage-50">
+                    <tr key={lead._id} className="hover:bg-sage-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-sage-900">
                         {lead.name}
                       </td>
@@ -198,7 +278,7 @@ const Admin = () => {
                         {lead.productInterest.replace('-', ' ')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-sage-600">
-                        {new Date(lead.timestamp).toLocaleDateString()}
+                        {new Date(lead.createdAt).toLocaleDateString()}
                       </td>
                     </tr>
                   ))}
