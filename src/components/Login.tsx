@@ -17,7 +17,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(process.env.BACKEND_API_URL || 'http://localhost:5050' + '/api/auth/login', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
