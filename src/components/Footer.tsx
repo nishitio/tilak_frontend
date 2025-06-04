@@ -1,7 +1,13 @@
 
 import { Leaf, Mail, Phone, MapPin } from "lucide-react";
+import LeadCaptureModal from "@/components/LeadCaptureModal";
+import { useLeadCapture } from "@/hooks/useLeadCapture";
 
 const Footer = () => {
+  const productCapture = useLeadCapture({ source: "footer-products", productInterest: "product-updates" });
+  const supportCapture = useLeadCapture({ source: "footer-support", productInterest: "support-updates" });
+  const newsletterCapture = useLeadCapture({ source: "footer-newsletter", productInterest: "newsletter" });
+
   return (
     <footer className="bg-sage-900 text-white py-16">
       <div className="container mx-auto px-6">
@@ -31,29 +37,90 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-semibold mb-6">Products</h3>
             <ul className="space-y-3 text-sage-300">
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Psyllium Husk Powder</a></li>
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Organic Capsules</a></li>
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Travel Packs</a></li>
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Wellness Bundles</a></li>
+              <li>
+                <button 
+                  onClick={productCapture.openModal} 
+                  className="hover:text-emerald-400 transition-colors text-left"
+                >
+                  Psyllium Husk Powder
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={productCapture.openModal} 
+                  className="hover:text-emerald-400 transition-colors text-left"
+                >
+                  Organic Capsules
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={productCapture.openModal} 
+                  className="hover:text-emerald-400 transition-colors text-left"
+                >
+                  Travel Packs
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={productCapture.openModal} 
+                  className="hover:text-emerald-400 transition-colors text-left"
+                >
+                  Wellness Bundles
+                </button>
+              </li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-xl font-semibold mb-6">Support</h3>
             <ul className="space-y-3 text-sage-300">
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">How to Use</a></li>
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">FAQs</a></li>
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Wellness Guide</a></li>
-              <li><a href="#" className="hover:text-emerald-400 transition-colors">Contact Us</a></li>
+              <li>
+                <button 
+                  onClick={supportCapture.openModal} 
+                  className="hover:text-emerald-400 transition-colors text-left"
+                >
+                  How to Use
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={supportCapture.openModal} 
+                  className="hover:text-emerald-400 transition-colors text-left"
+                >
+                  FAQs
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={supportCapture.openModal} 
+                  className="hover:text-emerald-400 transition-colors text-left"
+                >
+                  Wellness Guide
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={supportCapture.openModal} 
+                  className="hover:text-emerald-400 transition-colors text-left"
+                >
+                  Contact Us
+                </button>
+              </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-xl font-semibold mb-6">Contact</h3>
+            <h3 className="text-xl font-semibold mb-6">Connect</h3>
             <div className="space-y-4 text-sage-300">
               <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-emerald-400" />
-                <span>hello@naturalwellness.com</span>
+                <button 
+                  onClick={newsletterCapture.openModal}
+                  className="hover:text-emerald-400 transition-colors text-left"
+                >
+                  Join Our Newsletter
+                </button>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-5 h-5 text-emerald-400" />
@@ -80,6 +147,27 @@ const Footer = () => {
           </div>
         </div>
       </div>
+
+      <LeadCaptureModal 
+        open={productCapture.isOpen} 
+        onOpenChange={productCapture.closeModal}
+        source={productCapture.source}
+        productInterest={productCapture.productInterest}
+      />
+      
+      <LeadCaptureModal 
+        open={supportCapture.isOpen} 
+        onOpenChange={supportCapture.closeModal}
+        source={supportCapture.source}
+        productInterest={supportCapture.productInterest}
+      />
+      
+      <LeadCaptureModal 
+        open={newsletterCapture.isOpen} 
+        onOpenChange={newsletterCapture.closeModal}
+        source={newsletterCapture.source}
+        productInterest={newsletterCapture.productInterest}
+      />
     </footer>
   );
 };

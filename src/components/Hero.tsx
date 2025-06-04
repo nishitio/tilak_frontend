@@ -1,8 +1,13 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Leaf } from "lucide-react";
+import LeadCaptureModal from "@/components/LeadCaptureModal";
+import { useLeadCapture } from "@/hooks/useLeadCapture";
 
 const Hero = () => {
+  const primaryCapture = useLeadCapture({ source: "hero-primary", productInterest: "psyllium-husk" });
+  const secondaryCapture = useLeadCapture({ source: "hero-secondary", productInterest: "general-info" });
+
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-sage-50 to-sage-100 flex items-center justify-center overflow-hidden">
       {/* Background pattern */}
@@ -31,12 +36,21 @@ const Hero = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full text-lg group">
-            Start Your Wellness Journey
+          <Button 
+            size="lg" 
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full text-lg group"
+            onClick={primaryCapture.openModal}
+          >
+            Join Our Wellness Community
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Button>
-          <Button variant="outline" size="lg" className="border-sage-300 text-sage-700 hover:bg-sage-50 px-8 py-4 rounded-full text-lg">
-            Learn More
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="border-sage-300 text-sage-700 hover:bg-sage-50 px-8 py-4 rounded-full text-lg"
+            onClick={secondaryCapture.openModal}
+          >
+            Get Early Access
           </Button>
         </div>
         
@@ -55,6 +69,20 @@ const Hero = () => {
           </div>
         </div>
       </div>
+
+      <LeadCaptureModal 
+        open={primaryCapture.isOpen} 
+        onOpenChange={primaryCapture.closeModal}
+        source={primaryCapture.source}
+        productInterest={primaryCapture.productInterest}
+      />
+      
+      <LeadCaptureModal 
+        open={secondaryCapture.isOpen} 
+        onOpenChange={secondaryCapture.closeModal}
+        source={secondaryCapture.source}
+        productInterest={secondaryCapture.productInterest}
+      />
     </div>
   );
 };

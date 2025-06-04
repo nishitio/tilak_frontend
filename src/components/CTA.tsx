@@ -1,8 +1,13 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Gift } from "lucide-react";
+import LeadCaptureModal from "@/components/LeadCaptureModal";
+import { useLeadCapture } from "@/hooks/useLeadCapture";
 
 const CTA = () => {
+  const primaryCapture = useLeadCapture({ source: "cta-primary", productInterest: "waitlist" });
+  const secondaryCapture = useLeadCapture({ source: "cta-secondary", productInterest: "product-updates" });
+
   return (
     <section className="py-20 bg-gradient-to-r from-emerald-600 to-sage-600 relative overflow-hidden">
       {/* Background pattern */}
@@ -30,23 +35,32 @@ const CTA = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-            <Button size="lg" className="bg-white text-emerald-600 hover:bg-emerald-50 px-10 py-4 rounded-full text-lg font-semibold group">
-              Get Started Now
+            <Button 
+              size="lg" 
+              className="bg-white text-emerald-600 hover:bg-emerald-50 px-10 py-4 rounded-full text-lg font-semibold group"
+              onClick={primaryCapture.openModal}
+            >
+              Join the Waitlist
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10 px-10 py-4 rounded-full text-lg">
-              View All Products
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="border-white text-white hover:bg-white/10 px-10 py-4 rounded-full text-lg"
+              onClick={secondaryCapture.openModal}
+            >
+              Be the First to Know
             </Button>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
               <div className="text-2xl font-bold text-white mb-2">Free Shipping</div>
-              <div className="text-emerald-100">On orders over $25</div>
+              <div className="text-emerald-100">On launch orders over $25</div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
               <div className="text-2xl font-bold text-white mb-2">30-Day Guarantee</div>
-              <div className="text-emerald-100">Risk-free trial</div>
+              <div className="text-emerald-100">Risk-free trial promise</div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
               <div className="text-2xl font-bold text-white mb-2">Expert Support</div>
@@ -55,6 +69,20 @@ const CTA = () => {
           </div>
         </div>
       </div>
+
+      <LeadCaptureModal 
+        open={primaryCapture.isOpen} 
+        onOpenChange={primaryCapture.closeModal}
+        source={primaryCapture.source}
+        productInterest={primaryCapture.productInterest}
+      />
+      
+      <LeadCaptureModal 
+        open={secondaryCapture.isOpen} 
+        onOpenChange={secondaryCapture.closeModal}
+        source={secondaryCapture.source}
+        productInterest={secondaryCapture.productInterest}
+      />
     </section>
   );
 };

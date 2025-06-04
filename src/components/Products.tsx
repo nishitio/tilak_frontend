@@ -1,8 +1,12 @@
 
 import { Button } from "@/components/ui/button";
-import { Star, ShoppingCart } from "lucide-react";
+import { Star, Bell } from "lucide-react";
+import LeadCaptureModal from "@/components/LeadCaptureModal";
+import { useLeadCapture } from "@/hooks/useLeadCapture";
 
 const Products = () => {
+  const productCapture = useLeadCapture({ source: "product-page", productInterest: "premium-psyllium-husk" });
+
   return (
     <section className="py-20 bg-gradient-to-br from-emerald-50 to-sage-50">
       <div className="container mx-auto px-6">
@@ -17,8 +21,15 @@ const Products = () => {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl border border-sage-100">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl border border-sage-100 relative">
+            {/* Coming Soon Badge */}
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+              <div className="bg-emerald-600 text-white px-6 py-2 rounded-full text-sm font-semibold">
+                Coming Soon - Join Waitlist
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mt-8">
               <div className="relative">
                 <div className="bg-gradient-to-br from-sage-100 to-emerald-100 rounded-3xl p-8 h-80 flex items-center justify-center">
                   <img 
@@ -68,17 +79,21 @@ const Products = () => {
                     <span className="text-4xl font-bold text-sage-900">$24.99</span>
                     <span className="text-xl text-sage-500 line-through">$34.99</span>
                     <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium">
-                      30% OFF
+                      30% Launch Discount
                     </span>
                   </div>
                   
-                  <Button size="lg" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl text-lg group">
-                    <ShoppingCart className="mr-2 w-5 h-5 group-hover:scale-110 transition-transform" />
-                    Add to Cart - Free Shipping
+                  <Button 
+                    size="lg" 
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl text-lg group"
+                    onClick={productCapture.openModal}
+                  >
+                    <Bell className="mr-2 w-5 h-5 group-hover:scale-110 transition-transform" />
+                    Notify Me When Available
                   </Button>
                   
                   <p className="text-sm text-sage-500 text-center mt-3">
-                    30-day money-back guarantee • Free shipping on orders over $25
+                    Join 1,000+ people already on our waitlist • Early bird 30% discount guaranteed
                   </p>
                 </div>
               </div>
@@ -86,6 +101,13 @@ const Products = () => {
           </div>
         </div>
       </div>
+
+      <LeadCaptureModal 
+        open={productCapture.isOpen} 
+        onOpenChange={productCapture.closeModal}
+        source={productCapture.source}
+        productInterest={productCapture.productInterest}
+      />
     </section>
   );
 };
